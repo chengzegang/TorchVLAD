@@ -43,7 +43,7 @@ class VLAD(nn.Module):
         lafs, resps, descs = self.sift(x)
         B, N, D = descs.shape
         clusters, self._centroids.data, n_points = self.kmeans(
-            descs.flatten(end_dim=-2), self.num_clusters
+            descs.flatten(end_dim=-2)
         )
         self._populations.data += n_points
 
