@@ -1,0 +1,15 @@
+kornia
+pandas
+Pillow
+pykeops
+torch>=1.13.1+cu116
+torchvision>=0.14.2+cu116
+tqdm
+pandas
+numpy
+click
+matplotlib
+jupyter
+
+### CUDA PyTorch ###
+--extra-index-url https://download.pytorch.org/whl/cu116
