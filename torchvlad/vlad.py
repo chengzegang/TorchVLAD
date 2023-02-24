@@ -19,7 +19,7 @@ class VLAD(nn.Module):
         patch_size: int = 32,
         angle_bins: int = 8,
         spatial_bins: int = 4,
-        niter: int = 10,
+        n_iter: int = 10,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -33,7 +33,7 @@ class VLAD(nn.Module):
         self._centroids = nn.Parameter(
             torch.zeros(num_clusters).float(), requires_grad=False
         )
-        self.kmeans = KMeans(num_clusters, niter)
+        self.kmeans = KMeans(num_clusters, n_iter)
 
     @property
     def centroids(self) -> torch.Tensor:
