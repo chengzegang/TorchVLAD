@@ -352,8 +352,7 @@ def test(
     query_paths = [dataset.get_path(i) for i in range(len(dataset))]
     results = []
     for i, retr_indices in enumerate(retrivals.unbind(0)):
-        print(retr_indices.shape)
-        retr_paths = index_df["img_path"].iloc[retr_indices.numpy()]
+        retr_paths = index_df["img_path"].iloc[retr_indices.numpy()].tolist()
         results.append(dict(query=query_paths[i], retrivals=retr_paths))
     result_df = pd.DataFrame(results)
 
