@@ -4,7 +4,9 @@ from typing import Tuple
 
 import torch
 from pykeops.torch import LazyTensor  # type: ignore
-from torch import nn  # type: ignore
+from torch import nn
+
+from .kmeans import KMeans  # type: ignore
 
 from .sift import SIFT
 
@@ -17,6 +19,7 @@ class VLAD(nn.Module):
         patch_size: int = 32,
         angle_bins: int = 8,
         spatial_bins: int = 4,
+        niter: int = 10,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -30,40 +33,7 @@ class VLAD(nn.Module):
         self._centroids = nn.Parameter(
             torch.zeros(num_clusters).float(), requires_grad=False
         )
-
-    def KMeans(
-        self, x: torch.Tensor, K: int = 10, Niter: int = 10
-    ) -> Tuple[torch.Tensor, ...]:
-        """Implements Lloyd's algorithm for the Euclidean metric."""
-
-        N, D = x.shape  # Number of samples, dimension of the ambient space
-
-        centroids = x[:K, :].clone()  # Simplistic initialization for the centroids
-
-        x_i = LazyTensor(x.view(N, 1, D))  # (N, 1, D) samples
-        c_j = LazyTensor(centroids.view(1, K, D))  # (1, K, D) centroids
-
-        # K-means loop:
-        # - x  is the (N, D) point cloud,
-        # - cl is the (N,) vector of class labels
-        # - c  is the (K, D) cloud of cluster centroids
-        for i in range(Niter):
-            # E step: assign points to the closest cluster -------------------------
-            D_ij = ((x_i - c_j) ** 2).sum(-1)  # (N, K) symbolic squared distances
-            clusters = D_ij.argmin(dim=1).long().view(-1)  # Points -> Nearest cluster
-
-            # M step: update the centroids to the normalized cluster average: ------
-            # Compute the sum of points per cluster:
-            centroids.zero_()
-            centroids.scatter_add_(0, clusters[:, None].repeat(1, D), x)
-
-            # Divide by the number of points per cluster:
-            n_points = (
-                torch.bincount(clusters, minlength=K).type_as(centroids).view(K, 1)
-            )
-            centroids /= n_points  # in-place division to compute the average
-
-        return clusters, centroids, n_points.view(-1)
+        self.kmeans = KMeans(num_clusters, niter)
 
     @property
     def centroids(self) -> torch.Tensor:
@@ -72,7 +42,7 @@ class VLAD(nn.Module):
     def init_clusters(self, x: torch.Tensor) -> None:
         lafs, resps, descs = self.sift(x)
         B, N, D = descs.shape
-        clusters, self._centroids.data, n_points = self.KMeans(
+        clusters, self._centroids.data, n_points = self.kmeans(
             descs.flatten(end_dim=-2), self.num_clusters
         )
         self._populations.data += n_points

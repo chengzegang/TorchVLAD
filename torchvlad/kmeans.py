@@ -8,16 +8,16 @@ from torch import nn  # type: ignore
 
 
 class KMeans(nn.Module):
-    def __init__(self, k: int, Niter: int = 10) -> None:
+    def __init__(self, k: int, niters: int = 10) -> None:
         super().__init__()
         self.k = k
-        self.Niter = Niter
+        self.niters = niters
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, ...]:
-        return kmeans(x, self.k, self.Niter)
+        return kmeans(x, self.k, self.niters)
 
 
-def kmeans(x: torch.Tensor, K: int = 10, Niter: int = 10) -> Tuple[torch.Tensor, ...]:
+def kmeans(x: torch.Tensor, K: int = 10, niters: int = 10) -> Tuple[torch.Tensor, ...]:
     """Implements Lloyd's algorithm for the Euclidean metric."""
     N, D = x.shape  # Number of samples, dimension of the ambient space
     centroids = x[:K, :].clone()  # Simplistic initialization for the centroids
@@ -27,7 +27,7 @@ def kmeans(x: torch.Tensor, K: int = 10, Niter: int = 10) -> Tuple[torch.Tensor,
     # - x  is the (N, D) point cloud,
     # - cl is the (N,) vector of class labels
     # - c  is the (K, D) cloud of cluster centroids
-    for i in range(Niter):
+    for i in range(niters):
         # E step: assign points to the closest cluster -------------------------
         D_ij = ((x_i - c_j) ** 2).sum(-1)  # (N, K) symbolic squared distances
         clusters = D_ij.argmin(dim=1).long().view(-1)  # Points -> Nearest cluster
