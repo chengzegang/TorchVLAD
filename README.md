@@ -1,6 +1,6 @@
 # TorchVLAD
 
-This is a simple implementation of differentiable VLAD in pure PyTorch (with kornia).
+This is a simple implementation of VLAD in pure PyTorch (with kornia).
 
 -----
 
