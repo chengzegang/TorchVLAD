@@ -31,7 +31,7 @@ class ImageFolder(Dataset):
 
     def __getitem__(self, index: int) -> torch.Tensor:
         img = Image.open(self.imgs[index])
-        tensor = pil_to_tensor(img)
+        tensor: torch.Tensor = pil_to_tensor(img)
         if self.transform is not None:
             tensor = self.transform(tensor)
 

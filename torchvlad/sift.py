@@ -52,7 +52,7 @@ class SIFT(nn.Module):
             patches = extract_patches_from_pyramid(x, lafs, self.patch_size)
             B, N, CH, H, W = patches.size()
             descs = self.descriptor(patches.view(B * N, CH, H, W)).view(B, N, -1)
-            return descs
+            return descs  # type: ignore
 
     def forward(
         self, x: torch.Tensor
